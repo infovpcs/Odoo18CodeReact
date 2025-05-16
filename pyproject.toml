@@ -1,0 +1,74 @@
+[project]
+name = "react-agent"
+version = "0.0.1"
+description = "The project follows a simple agent graph structure, utilizing LangGraph for agent-based workflows and integrating Gemini model for enhanced AI capabilities. It ensures compatibility with Odoo React Agent while maintaining modular code structure."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Vinay Rana", email = "info@vperfectcs.com" }
+]
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "langgraph-cli[inmem]",
+    "langgraph[cache]==0.4.5",
+    "langgraph>=0.2.6",
+    "langchain-openai>=0.1.22",
+    "langchain-anthropic>=0.1.23",
+    "langchain>=0.3.19",
+    "langchain[google-genai]==0.3.25",
+    "langchain-fireworks>=0.1.7",
+    "python-dotenv>=1.0.1",
+    "langchain-community>=0.2.17",
+    "langchain-tavily>=0.1",
+    "python-fasthtml>=0.12.1",
+    "langgraph-sdk>=0.1.57"
+]
+
+
+[project.optional-dependencies]
+dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
+
+[build-system]
+requires = ["setuptools>=73.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["langgraph.templates.react_agent", "react_agent"]
+[tool.setuptools.package-dir]
+"langgraph.templates.react_agent" = "src/react_agent"
+"react_agent" = "src/react_agent"
+
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.ruff]
+lint.select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "D",    # pydocstyle
+    "D401", # First line should be in imperative mood
+    "T201",
+    "UP",
+]
+lint.ignore = [
+    "UP006",
+    "UP007",
+    # We actually do want to import from typing_extensions
+    "UP035",
+    # Relax the convention by _not_ requiring documentation for every function parameter.
+    "D417",
+    "E501",
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "UP"]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[dependency-groups]
+dev = [
+    "langgraph-api>=0.0.30",
+    "langgraph-cli[inmem]>=0.1.71",
+    "pytest>=8.3.5",
+]
