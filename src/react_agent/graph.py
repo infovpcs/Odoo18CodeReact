@@ -129,18 +129,34 @@ def route_model_output(state: State) -> Literal["__end__", "tools", "critic"]:
     Returns:
         str: The name of the next node to call ("__end__", "tools", or "critic").
     """
+    # Check exit conditions first
+    if hasattr(state, 'code_attempts') and hasattr(state, 'quality_score'):
+        # Exit if perfect score achieved
+        if state.quality_score >= 10 and state.correctness_score >= 10:
+            return "__end__"
+        
+        # Exit if maximum attempts reached
+        if state.code_attempts >= state.max_attempts:
+            return "__end__"
+    
+    # Existing routing logic
     last_message = state.messages[-1]
     if not isinstance(last_message, AIMessage):
         raise ValueError(
             f"Expected AIMessage in output edges, but got {type(last_message).__name__}"
         )
-    # If there are tool calls, execute the requested actions
+    
     if last_message.tool_calls:
         return "tools"
-    # If code evaluation is needed, route to critic
+        
     if should_evaluate_code(state):
+        # Increment attempt counter when evaluating code
+        if not hasattr(state, 'code_attempts'):
+            state.code_attempts = 1
+        else:
+            state.code_attempts += 1
         return "critic"
-    # Otherwise we finish
+        
     return "__end__"
 
 
