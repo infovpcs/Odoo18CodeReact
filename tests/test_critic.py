@@ -101,72 +101,79 @@ class TestCriticAgent(unittest.TestCase):
         self.assertTrue(recommendation)
         self.assertIsInstance(recommendation, str)
 
-    @pytest.mark.asyncio
-    @patch("react_agent.critic.create_llm_as_judge")
-    async def test_evaluate_code(self, mock_create_llm_as_judge):
-        """Test the evaluate_code function."""
-        # Create mock evaluators
-        mock_quality_evaluator = AsyncMock()
-        mock_quality_evaluator.ainvoke = AsyncMock(return_value={
-            "comment": "Quality: 9/10. Excellent structure with proper field definitions, methods, and tracking."
-        })
+    def test_evaluate_code_sync(self):
+        """Synchronous wrapper for the async test_evaluate_code function."""
+        # This is a placeholder that will be skipped
+        # The actual test is implemented as a standalone pytest function below
+        pass
 
-        mock_correctness_evaluator = AsyncMock()
-        mock_correctness_evaluator.ainvoke = AsyncMock(return_value={
-            "comment": "Correctness: 9/10. The model is functionally correct with proper inheritance and methods."
-        })
 
-        mock_create_llm_as_judge.side_effect = [
-            mock_quality_evaluator,
-            mock_correctness_evaluator,
-        ]
+@pytest.mark.asyncio
+@patch("react_agent.critic.create_llm_as_judge")
+async def test_evaluate_code_async(mock_create_llm_as_judge):
+    """Test the evaluate_code function using pytest's async support."""
+    # Create mock evaluators
+    mock_quality_evaluator = AsyncMock()
+    mock_quality_evaluator.ainvoke = AsyncMock(return_value={
+        "comment": "Quality: 9/10. Excellent structure with proper field definitions, methods, and tracking."
+    })
 
-        # Create a state with Odoo code in the messages
-        state = State(
-            messages=[
-                HumanMessage(content="Can you create an Odoo model?"),
-                AIMessage(
-                    content="""
-                    Here's an Odoo model:
+    mock_correctness_evaluator = AsyncMock()
+    mock_correctness_evaluator.ainvoke = AsyncMock(return_value={
+        "comment": "Correctness: 9/10. The model is functionally correct with proper inheritance and methods."
+    })
 
-                    ```python
-                    from odoo import models, fields, api
+    mock_create_llm_as_judge.side_effect = [
+        mock_quality_evaluator,
+        mock_correctness_evaluator,
+    ]
+
+    # Create a state with Odoo code in the messages
+    state = State(
+        messages=[
+            HumanMessage(content="Can you create an Odoo model?"),
+            AIMessage(
+                content="""
+                Here's an Odoo model:
+
+                ```python
+                from odoo import models, fields, api
+                
+                class CustomerFeedback(models.Model):
+                    _name = 'customer.feedback'
+                    _description = 'Customer Feedback'
+                    _inherit = ['mail.thread', 'mail.activity.mixin']
                     
-                    class CustomerFeedback(models.Model):
-                        _name = 'customer.feedback'
-                        _description = 'Customer Feedback'
-                        _inherit = ['mail.thread', 'mail.activity.mixin']
-                        
-                        name = fields.Char(string='Reference', required=True)
-                        partner_id = fields.Many2one('res.partner', string='Customer')
-                        feedback = fields.Text(string='Feedback')
-                        rating = fields.Selection([
-                            ('1', 'Poor'),
-                            ('2', 'Average'),
-                            ('3', 'Good'),
-                            ('4', 'Excellent')
-                        ], string='Rating')
-                    ```
-                    """
-                ),
-            ],
-            is_last_step=False,
-        )
+                    name = fields.Char(string='Reference', required=True)
+                    partner_id = fields.Many2one('res.partner', string='Customer')
+                    feedback = fields.Text(string='Feedback')
+                    rating = fields.Selection([
+                        ('1', 'Poor'),
+                        ('2', 'Average'),
+                        ('3', 'Good'),
+                        ('4', 'Excellent')
+                    ], string='Rating')
+                ```
+                """
+            ),
+        ],
+        is_last_step=False,
+    )
 
-        # Mock the Configuration
-        with patch("react_agent.critic.Configuration") as mock_config:
-            mock_config.from_context.return_value = MagicMock(model="gemini-pro")
+    # Mock the Configuration
+    with patch("react_agent.critic.Configuration") as mock_config:
+        mock_config.from_context.return_value = MagicMock(model="gemini-pro")
 
-            # Test the evaluate_code function
-            result = await evaluate_code(state)
+        # Test the evaluate_code function
+        result = await evaluate_code(state)
 
-            # Verify the result
-            self.assertIn("messages", result)
-            self.assertEqual(len(result["messages"]), 1)
-            feedback = result["messages"][0].content
-            self.assertIn("Code Evaluation Feedback", feedback)
-            self.assertIn("Quality Assessment", feedback)
-            self.assertIn("Correctness Assessment", feedback)
+        # Verify the result
+        assert "messages" in result
+        assert len(result["messages"]) == 1
+        feedback = result["messages"][0].content
+        assert "Code Evaluation Feedback" in feedback
+        assert "Quality Assessment" in feedback
+        assert "Correctness Assessment" in feedback
 
 
 if __name__ == "__main__":
