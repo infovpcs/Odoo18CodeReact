@@ -11,7 +11,7 @@ from openevals.llm import create_llm_as_judge
 
 from react_agent.configuration import Configuration
 from react_agent.state import State
-
+import asyncio
 
 # Define Odoo-specific evaluation prompts
 ODOO_CODE_QUALITY_PROMPT = """
@@ -43,6 +43,12 @@ You will be given a piece of code and need to evaluate it based on the following
 2. Proper use of Odoo APIs and methods
 3. Handling of edge cases and errors
 4. Compatibility with Odoo 18 specifically
+
+**Additional Considerations:**
+- Implement `mail.thread` integration for chatter functionality.
+- Follow Odoo 18 view guidelines (use `list` instead of `tree`).
+- Replace deprecated `attrs` with Odoo 18-compatible options.
+- Ensure security, error handling, and thorough testing.
 
 Code to evaluate:
 {outputs}
@@ -93,8 +99,8 @@ async def evaluate_code(state: State) -> Dict[str, List[AIMessage]]:
     )
     
     # Run evaluations
-    quality_result = await quality_evaluator.ainvoke({"outputs": code_to_evaluate})
-    correctness_result = await correctness_evaluator.ainvoke({"outputs": code_to_evaluate})
+    quality_result = await asyncio.to_thread(lambda: quality_evaluator(outputs=code_to_evaluate))
+    correctness_result = await asyncio.to_thread(lambda: correctness_evaluator(outputs=code_to_evaluate))        
     
     # Format feedback
     feedback = f"""## Code Evaluation Feedback
