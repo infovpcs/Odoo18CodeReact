@@ -15,6 +15,7 @@ dependencies = [
     "langchain-openai>=0.1.22",
     "langchain-anthropic>=0.1.23",
     "langchain>=0.3.19",
+    "langchain-google-genai>=0.1.5",  # Updated to ensure latest support for tool binding
     "langchain[google-genai]==0.3.25",
     "langchain-fireworks>=0.1.7",
     "python-dotenv>=1.0.1",
@@ -22,7 +23,11 @@ dependencies = [
     "langchain-tavily>=0.1",
     "python-fasthtml>=0.12.1",
     "langgraph-sdk>=0.1.57",
-    "openevals>=0.1.0"
+    "openevals>=0.1.0",
+    "supabase>=1.0.3",
+    "numpy>=1.24.0",
+    "tenacity>=8.2.0",
+    "google-generativeai>=0.3.1"  # Updated to ensure compatibility with newer models
 ]
 
 

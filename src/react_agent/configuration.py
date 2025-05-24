@@ -32,10 +32,12 @@ class Configuration:
     )
 
     model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
-        default="google_genai:gemini-2.0-flash",
+        default="google:gemini-1.5-flash",  # Using gemini-1.5-flash which has a free quota available
         metadata={
-            "description": "The name of the language model to use for the agent's main interactions. "
-            "Should be in the form: provider/model-name."
+            "description": "The language model to use for the agent's main interactions. "
+            "Should be in the form: provider:model-name. "
+            "For reliable tool binding, use models like OpenAI, Anthropic, or Google Gemini. "
+            "Options include: google:gemini-pro, openai:gpt-4-turbo, anthropic:claude-3-haiku"
         },
     )
 
@@ -43,6 +45,74 @@ class Configuration:
         default=10,
         metadata={
             "description": "The maximum number of search results to return for each search query."
+        },
+    )
+    
+    fallback_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
+        default="ollama:llama3.2:latest",
+        metadata={
+            "description": "The fallback language model to use when the primary model fails or reaches rate limits. "
+                        "Should be in the form: provider:model-name."
+        },
+    )
+    
+    enable_fallback: bool = field(
+        default=True,
+        metadata={
+            "description": "Whether to enable fallback to the fallback model when the primary model fails or reaches rate limits."
+        },
+    )
+    
+    ollama_base_url: str = field(
+        default="http://localhost:11434",
+        metadata={
+            "description": "The base URL for the Ollama API. Defaults to 'http://localhost:11434'."
+        },
+    )
+    
+    ollama_timeout: int = field(
+        default=300,
+        metadata={
+            "description": "The timeout in seconds for Ollama API requests. Defaults to 300 seconds (5 minutes) to accommodate CPU-based Ollama models."
+        },
+    )
+    
+    critic_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
+        default="google:gemma-3-27b-it",  # Using gemini-1.5-flash which has a free quota available
+        metadata={
+            "description": "The language model to use for the critic/validator. "
+                        "This model evaluates code quality and correctness. "
+                        "Should be in the form: provider:model-name. "
+                        "Options include: google:gemini-pro, openai:gpt-4-turbo, anthropic:claude-3-haiku"
+        },
+    )
+    
+    enable_critic_fallback: bool = field(
+        default=True,
+        metadata={
+            "description": "Whether to enable fallback for the critic model when it fails or reaches rate limits."
+        },
+    )
+    
+    critic_temperature: float = field(
+        default=0.2,
+        metadata={
+            "description": "The temperature to use for the critic model. Lower values make the output more deterministic."
+        },
+    )
+    
+    critic_max_tokens: int = field(
+        default=2000,
+        metadata={
+            "description": "The maximum number of tokens to generate for critic evaluations."
+        },
+    )
+    
+    recursion_limit: int = field(
+        default=50,
+        metadata={
+            "description": "The maximum number of graph recursions allowed before throwing an error. "
+            "Increase this value if your workflow requires more steps, but be careful to avoid infinite loops."
         },
     )
 

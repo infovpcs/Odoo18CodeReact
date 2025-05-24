@@ -1,9 +1,10 @@
-"""This module provides example tools for web scraping and search functionality.
+"""This module provides tools for web scraping, search functionality, and Odoo code utilities.
 
-It includes a basic Tavily search function (as an example)
+It includes:
+- A basic Tavily search function (as an example)
+- Odoo 18 Code Search/Load Utility tools for searching, loading, and validating Odoo code
 
-These tools are intended as free examples to get started. For production use,
-consider implementing more robust and specialized tools tailored to your needs.
+These tools support both Main and Critic agents in the LangGraph workflow.
 """
 
 from typing import Any, Callable, List, Optional, cast
@@ -12,6 +13,7 @@ from langchain_tavily import TavilySearch  # type: ignore[import-not-found]
 
 from react_agent.configuration import Configuration
 from langchain_core.tools import tool
+from react_agent.odoo_code_utils import ODOO_CODE_TOOLS
 
 
 async def search(query: str) -> Optional[dict[str, Any]]:
@@ -26,4 +28,4 @@ async def search(query: str) -> Optional[dict[str, Any]]:
     return cast(dict[str, Any], await wrapped.ainvoke({"query": query}))
 
 
-TOOLS: List[Callable[..., Any]] = [search]
+TOOLS: List[Callable[..., Any]] = [search] + ODOO_CODE_TOOLS
